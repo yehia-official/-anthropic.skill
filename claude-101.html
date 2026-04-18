@@ -1,0 +1,2062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude 101 — Learn to Work with Claude</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary:#0066cc;
+  --primary-light:#0080ff;
+  --accent:#00d084;
+  --accent-light:#33e0a0;
+  --bg:#08101f;
+  --bg-card:#0f1a30;
+  --bg-alt:#0d1628;
+  --text:#e8e8e8;
+  --text-muted:#8b92a8;
+  --border:#1a2a45;
+  --danger:#ff4757;
+  --warning:#ffc107;
+  --success:#00d084;
+  --radius:12px;
+  --radius-sm:8px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* Progress Bar */
+#progress-bar{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--primary-light),var(--accent));z-index:9999;transition:width .3s ease;width:0%}
+
+/* Nav */
+#top-nav{position:sticky;top:0;z-index:900;background:rgba(8,16,31,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:0 16px}
+.nav-inner{display:flex;align-items:center;gap:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none;-ms-overflow-style:none;height:52px}
+.nav-inner::-webkit-scrollbar{display:none}
+.nav-brand{font-weight:700;font-size:.95rem;color:var(--primary-light);margin-right:20px;flex-shrink:0;letter-spacing:.5px}
+.nav-brand span{color:var(--accent)}
+.nav-tab{flex-shrink:0;padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:500;color:var(--text-muted);cursor:pointer;transition:all .2s;border:none;background:none;font-family:'Poppins',sans-serif}
+.nav-tab:hover{color:var(--text);background:var(--bg-card)}
+.nav-tab.active{background:var(--primary);color:#fff}
+.nav-tab.completed{color:var(--accent);border:1px solid rgba(0,208,132,.3)}
+
+/* Hero */
+#hero{padding:80px 20px 60px;text-align:center;position:relative;overflow:hidden}
+#hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(0,128,255,.12),transparent)}
+.hero-badge{display:inline-block;padding:4px 16px;background:rgba(0,128,255,.12);border:1px solid rgba(0,128,255,.3);border-radius:20px;font-size:.78rem;font-weight:600;color:var(--primary-light);margin-bottom:20px;letter-spacing:.5px}
+.hero-title{font-size:clamp(2rem,6vw,3.8rem);font-weight:800;line-height:1.15;margin-bottom:16px}
+.hero-title .gradient{background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.05rem;color:var(--text-muted);max-width:560px;margin:0 auto 32px;line-height:1.7}
+.hero-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap}
+.stat{text-align:center}
+.stat-num{font-size:1.6rem;font-weight:700;color:var(--primary-light)}
+.stat-label{font-size:.75rem;color:var(--text-muted);margin-top:2px}
+
+/* Main Layout */
+#app{max-width:900px;margin:0 auto;padding:0 16px 120px}
+
+/* Module */
+.module{margin-bottom:48px;scroll-margin-top:64px}
+.module-header{position:relative;padding:28px 28px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
+.module-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--primary-light),var(--accent))}
+.module-tag{font-size:.72rem;font-weight:600;color:var(--primary-light);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px;font-family:'Fira Code',monospace}
+.module-title{font-size:1.5rem;font-weight:700;margin-bottom:6px}
+.module-desc{color:var(--text-muted);font-size:.92rem;line-height:1.6}
+
+/* Cards Grid */
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:20px}
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:transform .2s,border-color .2s}
+.card:hover{transform:translateY(-2px);border-color:rgba(0,128,255,.35)}
+.card-icon{font-size:1.8rem;margin-bottom:10px}
+.card-title{font-size:.9rem;font-weight:600;margin-bottom:6px;color:var(--text)}
+.card-text{font-size:.82rem;color:var(--text-muted);line-height:1.6}
+
+/* Code / Prompt blocks */
+.code-block{background:#060e1a;border:1px solid var(--border);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:20px;position:relative;overflow-x:auto}
+.code-block pre{font-family:'Fira Code',monospace;font-size:.83rem;color:#a8d8ff;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.code-block .block-label{font-size:.7rem;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:'Fira Code',monospace}
+.prompt-block{background:rgba(0,208,132,.04);border:1px solid rgba(0,208,132,.2);border-radius:var(--radius-sm);padding:18px 20px;margin-bottom:20px;position:relative}
+.prompt-block pre{font-family:'Fira Code',monospace;font-size:.83rem;color:#b3f5d8;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.prompt-block .block-label{font-size:.7rem;font-weight:600;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;font-family:'Fira Code',monospace}
+.copy-btn{position:absolute;top:12px;right:12px;background:var(--bg-alt);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:.72rem;color:var(--text-muted);cursor:pointer;font-family:'Fira Code',monospace;transition:all .2s}
+.copy-btn:hover{border-color:var(--primary-light);color:var(--primary-light)}
+
+/* Callouts */
+.callout{border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:20px;display:flex;gap:12px;align-items:flex-start}
+.callout.info{background:rgba(0,128,255,.08);border:1px solid rgba(0,128,255,.25);border-left:3px solid var(--primary-light)}
+.callout.tip{background:rgba(0,208,132,.08);border:1px solid rgba(0,208,132,.25);border-left:3px solid var(--accent)}
+.callout.warn{background:rgba(255,193,7,.06);border:1px solid rgba(255,193,7,.25);border-left:3px solid var(--warning)}
+.callout-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px}
+.callout-body{font-size:.85rem;line-height:1.65;color:var(--text)}
+.callout-body strong{color:var(--text)}
+
+/* Sandbox */
+.sandbox{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px}
+.sandbox-title{font-size:.85rem;font-weight:600;color:var(--primary-light);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sandbox-title::before{content:'⚡'}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:540px){.form-row{grid-template-columns:1fr}}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.78rem;font-weight:500;color:var(--text-muted)}
+.form-group input,.form-group select,.form-group textarea{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;color:var(--text);font-family:'Poppins',sans-serif;font-size:.83rem;outline:none;transition:border-color .2s;resize:vertical}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--primary-light)}
+.form-group select option{background:var(--bg-card)}
+.output-area{background:var(--bg-alt);border:1px solid rgba(0,208,132,.2);border-radius:var(--radius-sm);padding:14px;min-height:80px;font-family:'Fira Code',monospace;font-size:.82rem;color:#b3f5d8;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-top:12px}
+.output-label{font-size:.72rem;color:var(--accent);font-weight:600;letter-spacing:1px;margin-top:12px;margin-bottom:6px;text-transform:uppercase;font-family:'Fira Code',monospace}
+.demo-area{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:16px;margin-top:12px}
+
+/* Quiz */
+.quiz{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin-bottom:20px}
+.quiz-title{font-size:.85rem;font-weight:600;color:var(--warning);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.quiz-title::before{content:'🧪'}
+.question{margin-bottom:18px}
+.question p{font-size:.88rem;font-weight:500;margin-bottom:10px;line-height:1.5}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:.83rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:10px;user-select:none}
+.opt:hover:not(.locked){border-color:var(--primary-light);background:rgba(0,128,255,.07)}
+.opt.correct{background:rgba(0,208,132,.1);border-color:var(--success);color:var(--success)}
+.opt.wrong{background:rgba(255,71,87,.1);border-color:var(--danger);color:var(--danger);animation:shake .4s ease}
+.opt.locked{cursor:default;pointer-events:none}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.quiz-feedback{font-size:.8rem;margin-top:6px;height:18px;font-weight:500}
+.quiz-feedback.ok{color:var(--success)}
+.quiz-feedback.err{color:var(--danger)}
+
+/* Tasks */
+#tasks-section{margin-top:60px}
+.tasks-header{text-align:center;padding:40px 20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:28px;position:relative;overflow:hidden}
+.tasks-header::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--warning),var(--accent))}
+.tasks-header h2{font-size:1.6rem;font-weight:700;margin-bottom:8px}
+.tasks-header p{color:var(--text-muted);font-size:.9rem}
+
+.task-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden;transition:opacity .3s}
+.task-card.locked-task{opacity:.5;pointer-events:none}
+.task-header{padding:20px 22px 16px;border-bottom:1px solid var(--border);position:relative}
+.task-header::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--primary-light),var(--accent))}
+.task-num{font-size:.72rem;font-weight:600;color:var(--warning);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;font-family:'Fira Code',monospace}
+.task-title{font-size:1.05rem;font-weight:600;margin-bottom:4px}
+.task-sub{font-size:.82rem;color:var(--text-muted)}
+.task-body{padding:20px 22px}
+.task-scenario{background:var(--bg-alt);border-left:3px solid var(--warning);border-radius:0 var(--radius-sm) var(--radius-sm) 0;padding:12px 16px;margin-bottom:16px;font-size:.85rem;color:var(--text);line-height:1.65}
+.task-reqs{margin-bottom:16px}
+.task-reqs h4{font-size:.8rem;font-weight:600;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px}
+.req-item{display:flex;align-items:flex-start;gap:8px;font-size:.83rem;margin-bottom:6px;color:var(--text-muted)}
+.req-item::before{content:'□';color:var(--border);font-size:1rem;flex-shrink:0;margin-top:1px;transition:color .2s}
+.req-item.met{color:var(--success)}
+.req-item.met::before{content:'✓';color:var(--success)}
+.task-editor{width:100%;min-height:140px;background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px 14px;color:var(--text);font-family:'Fira Code',monospace;font-size:.82rem;line-height:1.7;outline:none;resize:vertical;transition:border-color .2s;margin-bottom:12px}
+.task-editor:focus{border-color:var(--primary-light)}
+.task-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.btn{padding:9px 20px;border-radius:var(--radius-sm);font-size:.83rem;font-weight:600;cursor:pointer;border:none;font-family:'Poppins',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-light)}
+.btn-success{background:var(--success);color:#08101f}
+.btn-outline{background:transparent;color:var(--text-muted);border:1px solid var(--border)}
+.btn-outline:hover{border-color:var(--primary-light);color:var(--primary-light)}
+.task-result{font-size:.82rem;padding:10px 14px;border-radius:var(--radius-sm);margin-top:10px;display:none}
+.task-result.pass{background:rgba(0,208,132,.1);border:1px solid rgba(0,208,132,.3);color:var(--success);display:block}
+.task-result.fail{background:rgba(255,71,87,.08);border:1px solid rgba(255,71,87,.25);color:var(--danger);display:block}
+.lock-badge{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;color:var(--text-muted);padding:6px 12px;background:var(--bg-alt);border:1px solid var(--border);border-radius:20px;margin-bottom:12px}
+
+/* Scroll reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* Mobile bottom nav */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,16,31,.96);backdrop-filter:blur(12px);border-top:1px solid var(--border);padding:12px 20px;display:flex;align-items:center;justify-content:space-between;z-index:800}
+.bnav-btn{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 14px;font-size:.8rem;font-weight:600;color:var(--text-muted);cursor:pointer;font-family:'Poppins',sans-serif;transition:all .2s}
+.bnav-btn:hover:not(:disabled){border-color:var(--primary-light);color:var(--primary-light)}
+.bnav-btn:disabled{opacity:.3;cursor:default}
+.bnav-label{font-size:.78rem;font-weight:500;color:var(--text-muted);text-align:center;flex:1;padding:0 10px}
+.bnav-label span{display:block;font-size:.68rem;color:var(--primary-light);font-weight:600}
+.bnav-dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
+.bnav-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:background .2s}
+.bnav-dot.active{background:var(--primary-light)}
+.bnav-dot.done{background:var(--accent)}
+.bnav-center{display:flex;flex-direction:column;align-items:center;flex:1}
+
+/* Misc */
+.section-divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:32px 0}
+.tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:.72rem;font-weight:600;margin-right:6px;margin-bottom:4px}
+.tag.blue{background:rgba(0,128,255,.12);color:var(--primary-light);border:1px solid rgba(0,128,255,.25)}
+.tag.green{background:rgba(0,208,132,.1);color:var(--accent);border:1px solid rgba(0,208,132,.25)}
+.tag.yellow{background:rgba(255,193,7,.1);color:var(--warning);border:1px solid rgba(255,193,7,.25)}
+
+/* Visual demos */
+.demo-chat{display:flex;flex-direction:column;gap:10px;max-height:240px;overflow-y:auto}
+.chat-msg{padding:10px 14px;border-radius:var(--radius-sm);font-size:.83rem;line-height:1.6;max-width:85%}
+.chat-msg.user{background:rgba(0,128,255,.12);border:1px solid rgba(0,128,255,.25);align-self:flex-end;color:var(--text)}
+.chat-msg.ai{background:rgba(0,208,132,.06);border:1px solid rgba(0,208,132,.2);align-self:flex-start;color:var(--text)}
+.chat-msg .sender{font-size:.7rem;font-weight:600;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.chat-msg.user .sender{color:var(--primary-light)}
+.chat-msg.ai .sender{color:var(--accent)}
+
+/* Artifacts visual */
+.artifact-demo{border:1px solid rgba(0,208,132,.2);border-radius:var(--radius);background:rgba(0,208,132,.03);padding:16px}
+.artifact-toolbar{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.artifact-toolbar span{font-size:.75rem;color:var(--text-muted)}
+.artifact-btn{padding:4px 12px;border-radius:6px;font-size:.75rem;background:var(--bg-alt);border:1px solid var(--border);color:var(--text-muted);cursor:pointer;transition:all .15s}
+.artifact-btn:hover{border-color:var(--accent);color:var(--accent)}
+.artifact-content{background:var(--bg);border-radius:var(--radius-sm);padding:12px;font-family:'Fira Code',monospace;font-size:.78rem;color:#a8d8ff;min-height:60px;line-height:1.7}
+
+/* Tools grid */
+.tools-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.tool-chip{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;text-align:center;cursor:pointer;transition:all .2s}
+.tool-chip:hover{border-color:var(--primary-light);transform:translateY(-2px)}
+.tool-chip .t-icon{font-size:1.4rem;margin-bottom:6px}
+.tool-chip .t-name{font-size:.75rem;font-weight:600;color:var(--text)}
+.tool-chip .t-desc{font-size:.68rem;color:var(--text-muted);margin-top:2px}
+.tool-chip.connected{border-color:rgba(0,208,132,.4);background:rgba(0,208,132,.04)}
+
+/* Roles grid */
+.roles-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.role-tab{padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--bg-alt);color:var(--text-muted);transition:all .2s}
+.role-tab.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.role-content{display:none}
+.role-content.active{display:block}
+.use-case-item{display:flex;gap:10px;margin-bottom:10px;font-size:.85rem;line-height:1.55}
+.use-case-item::before{content:'→';color:var(--accent);flex-shrink:0;font-weight:700}
+
+/* Patterns */
+.pattern-card{background:var(--bg-alt);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:12px;overflow:hidden}
+.pattern-header{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;user-select:none}
+.pattern-header:hover{background:rgba(255,255,255,.02)}
+.pattern-name{font-size:.88rem;font-weight:600;display:flex;align-items:center;gap:10px}
+.pattern-body{display:none;padding:14px 16px;border-top:1px solid var(--border)}
+.pattern-body.open{display:block}
+
+/* Progress tracker */
+#overall-progress{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.progress-text{font-size:.82rem;color:var(--text-muted);flex-shrink:0}
+.progress-track{flex:1;min-width:120px;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--primary-light),var(--accent));border-radius:3px;transition:width .4s ease}
+.progress-pct{font-size:.82rem;font-weight:600;color:var(--accent);flex-shrink:0}
+
+/* Responsive */
+@media(max-width:640px){
+  .cards-grid{grid-template-columns:1fr}
+  .hero-stats{gap:16px}
+  .stat-num{font-size:1.3rem}
+  .module-header{padding:20px 18px 16px}
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- NAV -->
+<nav id="top-nav">
+  <div class="nav-inner">
+    <div class="nav-brand">Claude <span>101</span></div>
+    <button class="nav-tab active" onclick="scrollToModule(0)">01 · What is Claude</button>
+    <button class="nav-tab" onclick="scrollToModule(1)">02 · First Convo</button>
+    <button class="nav-tab" onclick="scrollToModule(2)">03 · Better Results</button>
+    <button class="nav-tab" onclick="scrollToModule(3)">04 · Desktop App</button>
+    <button class="nav-tab" onclick="scrollToModule(4)">05 · Projects</button>
+    <button class="nav-tab" onclick="scrollToModule(5)">06 · Artifacts</button>
+    <button class="nav-tab" onclick="scrollToModule(6)">07 · Skills & Tools</button>
+    <button class="nav-tab" onclick="scrollToModule(7)">08 · Research Mode</button>
+    <button class="nav-tab" onclick="scrollToModule(8)">09 · Use-Cases</button>
+    <button class="nav-tab" onclick="scrollToModule(9)">10 · Patterns</button>
+    <button class="nav-tab" onclick="document.getElementById('tasks-section').scrollIntoView({behavior:'smooth'})">📋 Tasks</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-badge">🎓 INTERACTIVE MASTERCLASS</div>
+  <h1 class="hero-title">Claude <span class="gradient">101</span><br>Learn to Work with Claude</h1>
+  <p class="hero-sub">10 modules · 4 hands-on tasks · interactive sandboxes · knowledge checks. Go from zero to confident Claude user.</p>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">10</div><div class="stat-label">Modules</div></div>
+    <div class="stat"><div class="stat-num">4</div><div class="stat-label">Tasks</div></div>
+    <div class="stat"><div class="stat-num">20</div><div class="stat-label">Quiz Questions</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Sandbox Tries</div></div>
+  </div>
+</section>
+
+<main id="app">
+
+  <!-- Progress -->
+  <div id="overall-progress">
+    <div class="progress-text">Your Progress</div>
+    <div class="progress-track"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+    <div class="progress-pct" id="prog-pct">0%</div>
+  </div>
+
+  <!-- ========= MODULE 01 ========= -->
+  <section class="module reveal" id="mod-0">
+    <div class="module-header">
+      <div class="module-tag">Module 01</div>
+      <div class="module-title">🤖 What is Claude</div>
+      <div class="module-desc">Understand what Claude is, how it reasons, and what it can and can't do — so you can use it realistically.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🧠</div>
+        <div class="card-title">A Language Model</div>
+        <div class="card-text">Claude is an AI trained by Anthropic on vast text data. It predicts the most useful next token — but through that, it reasons, writes, codes, and analyzes at a remarkably high level.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚖️</div>
+        <div class="card-title">Constitutional AI</div>
+        <div class="card-text">Anthropic trains Claude with a "constitution" of principles — to be helpful, harmless, and honest. It's not just filtered output; it's a model that reasons about ethics.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">✅</div>
+        <div class="card-title">What It Can Do</div>
+        <div class="card-text">Write, summarize, code, translate, brainstorm, explain, analyze, extract, roleplay, plan, and much more — across virtually every domain of text and knowledge.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🚫</div>
+        <div class="card-title">What It Can't Do</div>
+        <div class="card-text">Claude can't browse the web in real-time (unless tools are connected), has a knowledge cutoff, can hallucinate facts, and doesn't have persistent memory by default between sessions.</div>
+      </div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="block-label">💬 Example — Asking Claude what it is</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>You: "What are you, exactly? What can I realistically expect from you?"
+
+Claude: I'm Claude, an AI assistant made by Anthropic. I'm good at:
+— Writing, editing, and summarizing text
+— Coding in most languages
+— Reasoning through complex problems step by step
+— Answering questions from my training knowledge (up to a cutoff)
+
+I'm not a search engine — I don't browse the web unless you connect me to a tool that allows that.
+I can also make mistakes, so for high-stakes facts, always verify.</pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>Think of Claude as a brilliant collaborator</strong>, not a perfect oracle. The more context and clarity you give it, the better its outputs become. It works best as a thinking partner.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">Capability Explorer</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>What do you want to do?</label>
+          <select id="s1-task" onchange="updateS1()">
+            <option value="">— pick a task —</option>
+            <option value="write">Write content</option>
+            <option value="code">Write code</option>
+            <option value="analyze">Analyze data</option>
+            <option value="summarize">Summarize text</option>
+            <option value="brainstorm">Brainstorm ideas</option>
+            <option value="translate">Translate</option>
+            <option value="explain">Explain a concept</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Your domain/field</label>
+          <input type="text" id="s1-domain" placeholder="e.g., marketing, education, finance" oninput="updateS1()">
+        </div>
+      </div>
+      <div class="output-label">📊 Claude's capability for this combo</div>
+      <div class="output-area" id="s1-output">Select a task and type your domain to see how well Claude handles it...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-0-0">
+        <p>1. Which statement best describes Claude's knowledge limitations?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-0-0',false)"><span>🔘</span> Claude knows everything on the internet in real-time</div>
+          <div class="opt" onclick="checkQ(this,'q-0-0',true)"><span>🔘</span> Claude has a knowledge cutoff and can hallucinate — verify important facts</div>
+          <div class="opt" onclick="checkQ(this,'q-0-0',false)"><span>🔘</span> Claude never makes mistakes because it's AI</div>
+        </div>
+        <div class="quiz-feedback" id="qf-0-0"></div>
+      </div>
+      <div class="question" id="q-0-1">
+        <p>2. Constitutional AI means Claude…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-0-1',false)"><span>🔘</span> Is only allowed to answer legal questions</div>
+          <div class="opt" onclick="checkQ(this,'q-0-1',false)"><span>🔘</span> Has a list of banned words it avoids</div>
+          <div class="opt" onclick="checkQ(this,'q-0-1',true)"><span>🔘</span> Is trained with a set of principles to reason about being helpful, harmless, and honest</div>
+        </div>
+        <div class="quiz-feedback" id="qf-0-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 02 ========= -->
+  <section class="module reveal" id="mod-1">
+    <div class="module-header">
+      <div class="module-tag">Module 02</div>
+      <div class="module-title">💬 Your First Conversation</div>
+      <div class="module-desc">Learn prompt basics — how to start a conversation, set the right tone, and give Claude useful context from the very first message.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🎯</div>
+        <div class="card-title">State Your Goal First</div>
+        <div class="card-text">Begin every prompt with what you want. "Write me a blog post about X." "Explain Y to me." "Help me debug this code." Clarity upfront saves iterations.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🎭</div>
+        <div class="card-title">Set Tone & Role</div>
+        <div class="card-text">Tell Claude who it's talking to and what voice to use. "You're a senior developer reviewing my code" or "Explain this like I'm 12" completely changes the output.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📋</div>
+        <div class="card-title">Give Context</div>
+        <div class="card-text">The more relevant background you share, the better the response. Claude has no access to your situation unless you describe it — assume it knows nothing about your specific case.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔄</div>
+        <div class="card-title">Iterate Naturally</div>
+        <div class="card-text">Claude remembers the whole conversation thread. Follow up with "make it shorter", "add more examples", or "change the tone to formal" — treat it like a real dialogue.</div>
+      </div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="block-label">💬 Bad vs Good First Message</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>❌ BAD:  "write something about coffee"
+
+✅ GOOD: "Write a 150-word Instagram caption for a specialty coffee brand
+targeting young professionals. Tone: warm, slightly witty. Include a
+call-to-action to visit our online store. Brand name: BrewCraft."
+
+The difference? Specificity. The good version has:
+→ Length (150 words)    → Platform (Instagram)
+→ Audience             → Tone (warm, witty)
+→ Goal (drive traffic) → Brand name</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>The "3 Ws" trick:</strong> Who is the audience? What is the output? Why does it matter / what's the goal? Answer these 3 in your first message and you'll get dramatically better first drafts.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">First Message Builder</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>What do you want Claude to do?</label>
+          <input type="text" id="s2-task" placeholder="e.g., write a product description" oninput="updateS2()">
+        </div>
+        <div class="form-group">
+          <label>Who is the audience?</label>
+          <input type="text" id="s2-audience" placeholder="e.g., beginner Python developers" oninput="updateS2()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Desired tone</label>
+          <select id="s2-tone" onchange="updateS2()">
+            <option value="professional">Professional</option>
+            <option value="casual">Casual & friendly</option>
+            <option value="technical">Technical & precise</option>
+            <option value="witty">Witty & engaging</option>
+            <option value="empathetic">Empathetic</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Any extra context</label>
+          <input type="text" id="s2-ctx" placeholder="e.g., for a SaaS landing page" oninput="updateS2()">
+        </div>
+      </div>
+      <div class="output-label">🚀 Your First Message to Claude</div>
+      <div class="output-area" id="s2-output">Fill in the fields above to generate your first message...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-1-0">
+        <p>1. Claude remembers context from earlier in the conversation because…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-1-0',false)"><span>🔘</span> It stores data in a database between sessions</div>
+          <div class="opt" onclick="checkQ(this,'q-1-0',true)"><span>🔘</span> The entire conversation thread is included as context in each request</div>
+          <div class="opt" onclick="checkQ(this,'q-1-0',false)"><span>🔘</span> It uses your account profile to remember you</div>
+        </div>
+        <div class="quiz-feedback" id="qf-1-0"></div>
+      </div>
+      <div class="question" id="q-1-1">
+        <p>2. Which element does NOT improve a first message to Claude?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-1-1',false)"><span>🔘</span> Specifying the desired tone</div>
+          <div class="opt" onclick="checkQ(this,'q-1-1',false)"><span>🔘</span> Describing the audience</div>
+          <div class="opt" onclick="checkQ(this,'q-1-1',true)"><span>🔘</span> Typing in ALL CAPS to get Claude's attention</div>
+          <div class="opt" onclick="checkQ(this,'q-1-1',false)"><span>🔘</span> Stating the output format you need</div>
+        </div>
+        <div class="quiz-feedback" id="qf-1-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 03 ========= -->
+  <section class="module reveal" id="mod-2">
+    <div class="module-header">
+      <div class="module-tag">Module 03</div>
+      <div class="module-title">🎯 Getting Better Results</div>
+      <div class="module-desc">Prompt engineering fundamentals: clarity, context, examples, and iteration to unlock Claude's full potential.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <div class="card-title">Clarity over Cleverness</div>
+        <div class="card-text">Plain, direct language beats elaborate phrasing. "List 5 marketing hooks for a fitness app" works better than "Could you perhaps provide some potential hooks that might work for a fitness-related application?"</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📚</div>
+        <div class="card-title">Show, Don't Just Tell</div>
+        <div class="card-text">Giving Claude an example of what you want (few-shot prompting) dramatically increases accuracy. "Like this example: [example]. Now do it for X" is extremely powerful.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📐</div>
+        <div class="card-title">Constrain the Output</div>
+        <div class="card-text">Specify format, length, structure. "Respond in bullet points", "Keep it under 200 words", "Use a table with 3 columns: Tool | Use Case | Cost" all give you predictable, usable output.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔁</div>
+        <div class="card-title">Iterate Strategically</div>
+        <div class="card-text">Don't start over — refine. "Great, now make the intro punchier." "Remove the third bullet." "Add a section about pricing." Build on what's working.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="block-label">📝 Prompt Engineering Framework (CCTF)</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>C — Context:    "I'm a frontend developer building a React SaaS app."
+C — Command:    "Review this component for performance issues."
+T — Target:     "Audience: my senior dev team in a code review."
+F — Format:     "Use bullet points. Severity: Critical / Minor / Suggestion."
+
+Combined:
+"I'm a frontend dev building a React SaaS. Review this component [paste code]
+for performance issues. Present findings for my senior team using bullet points,
+labeled Critical / Minor / Suggestion."</pre>
+    </div>
+
+    <div class="prompt-block">
+      <div class="block-label">💬 Few-Shot Example Prompt</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>Generate product taglines in this style:
+
+Example input:  "Ergonomic office chair"
+Example output: "Work longer. Hurt less."
+
+Example input:  "Noise-cancelling headphones"
+Example output: "Your world. Your rules. Your silence."
+
+Now generate one for: "AI writing assistant for marketers"</pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>The Vagueness Trap:</strong> "Write me a good email" will always produce generic output. Every word of ambiguity in your prompt is a roll of the dice on what Claude assumes you meant. Be specific — you can always relax constraints later.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">Advanced Prompt Builder (CCTF Method)</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Context (who you are / situation)</label>
+          <input type="text" id="s3-ctx" placeholder="e.g., I'm a startup founder pitching investors" oninput="updateS3()">
+        </div>
+        <div class="form-group">
+          <label>Command (what Claude should do)</label>
+          <input type="text" id="s3-cmd" placeholder="e.g., write a 1-page executive summary" oninput="updateS3()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Target (audience)</label>
+          <input type="text" id="s3-tgt" placeholder="e.g., non-technical angel investors" oninput="updateS3()">
+        </div>
+        <div class="form-group">
+          <label>Format constraints</label>
+          <input type="text" id="s3-fmt" placeholder="e.g., under 300 words, 3 sections, bullet points" oninput="updateS3()">
+        </div>
+      </div>
+      <div class="output-label">✨ Your Engineered Prompt</div>
+      <div class="output-area" id="s3-output">Fill the CCTF fields to build a structured prompt...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-2-0">
+        <p>1. "Few-shot prompting" means…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-2-0',false)"><span>🔘</span> Sending very short prompts to save time</div>
+          <div class="opt" onclick="checkQ(this,'q-2-0',true)"><span>🔘</span> Giving Claude 1–3 examples of the pattern you want before asking it to do a new one</div>
+          <div class="opt" onclick="checkQ(this,'q-2-0',false)"><span>🔘</span> Only using Claude a few times per day</div>
+        </div>
+        <div class="quiz-feedback" id="qf-2-0"></div>
+      </div>
+      <div class="question" id="q-2-1">
+        <p>2. When Claude's first output isn't quite right, you should…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-2-1',false)"><span>🔘</span> Start a new conversation from scratch every time</div>
+          <div class="opt" onclick="checkQ(this,'q-2-1',true)"><span>🔘</span> Refine with targeted follow-up instructions like "make the intro shorter"</div>
+          <div class="opt" onclick="checkQ(this,'q-2-1',false)"><span>🔘</span> Assume Claude can't do the task</div>
+        </div>
+        <div class="quiz-feedback" id="qf-2-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 04 ========= -->
+  <section class="module reveal" id="mod-3">
+    <div class="module-header">
+      <div class="module-tag">Module 04</div>
+      <div class="module-title">🖥️ Claude Desktop App</div>
+      <div class="module-desc">Understand the three modes of Claude: Chat, Cowork, and Code — and know when to use each one.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">💬</div>
+        <div class="card-title">Chat Interface</div>
+        <div class="card-text">The classic conversational UI. Best for quick questions, brainstorming, writing tasks, and iterative dialogue. Available on web, iOS, Android, and desktop.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🤝</div>
+        <div class="card-title">Cowork (Desktop)</div>
+        <div class="card-text">A collaborative workspace for complex, multi-step tasks with files and documents. Claude can see your screen context and work alongside you across apps like Excel and PowerPoint.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">💻</div>
+        <div class="card-title">Claude Code (Terminal)</div>
+        <div class="card-text">A CLI tool for agentic coding workflows. Claude can read your codebase, make changes, run tests, and iterate autonomously. For serious developers.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🧩</div>
+        <div class="card-title">Extensions (Chrome, Excel, PPT)</div>
+        <div class="card-text">Claude embedded in your existing tools. Claude in Chrome browses with you, Claude in Excel analyzes spreadsheets, Claude in PowerPoint creates slides — all in context.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="block-label">🗺️ Decision Guide: Which Claude mode to use?</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>Need to...                          Use...
+─────────────────────────────────────────────────────
+Ask a question / write content      → Claude.ai Chat
+Work with files + complex workflow  → Cowork (Desktop)
+Automate your codebase              → Claude Code (CLI)
+Browse web + research               → Claude in Chrome
+Analyze / generate spreadsheets     → Claude in Excel
+Create slides quickly               → Claude in PowerPoint
+Build integrations + pipelines      → API / Claude Code</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Pro tip:</strong> The Desktop App gives Claude access to your computer's context — it can see what app you're in and what file you're working on. This makes it far more powerful for actual workflows versus browser-only chat.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">Mode Recommender — What should I use?</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>What are you trying to do?</label>
+          <select id="s4-use" onchange="updateS4()">
+            <option value="">— select your use case —</option>
+            <option value="write">Write an email or document</option>
+            <option value="code">Write or debug code</option>
+            <option value="data">Analyze data in a spreadsheet</option>
+            <option value="research">Research a topic online</option>
+            <option value="slides">Create a presentation</option>
+            <option value="automate">Automate a codebase</option>
+            <option value="chat">Quick question or brainstorm</option>
+            <option value="complex">Complex multi-step workflow with files</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Your technical level</label>
+          <select id="s4-level" onchange="updateS4()">
+            <option value="beginner">Beginner — no coding</option>
+            <option value="intermediate">Intermediate — comfortable with apps</option>
+            <option value="developer">Developer — comfortable with CLI</option>
+          </select>
+        </div>
+      </div>
+      <div class="output-label">🎯 Recommended Mode</div>
+      <div class="output-area" id="s4-output">Select your use case to get a recommendation...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-3-0">
+        <p>1. Claude Code (CLI) is best suited for…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-3-0',false)"><span>🔘</span> Quick writing tasks like drafting emails</div>
+          <div class="opt" onclick="checkQ(this,'q-3-0',true)"><span>🔘</span> Developers who want Claude to autonomously work on their codebase</div>
+          <div class="opt" onclick="checkQ(this,'q-3-0',false)"><span>🔘</span> Creating PowerPoint presentations</div>
+        </div>
+        <div class="quiz-feedback" id="qf-3-0"></div>
+      </div>
+      <div class="question" id="q-3-1">
+        <p>2. Which product lets Claude see your screen and work alongside you across apps?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-3-1',false)"><span>🔘</span> Claude Chat (web)</div>
+          <div class="opt" onclick="checkQ(this,'q-3-1',true)"><span>🔘</span> Cowork (Desktop App)</div>
+          <div class="opt" onclick="checkQ(this,'q-3-1',false)"><span>🔘</span> Claude API</div>
+        </div>
+        <div class="quiz-feedback" id="qf-3-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 05 ========= -->
+  <section class="module reveal" id="mod-4">
+    <div class="module-header">
+      <div class="module-tag">Module 05</div>
+      <div class="module-title">📁 Projects & Knowledge</div>
+      <div class="module-desc">Organize your Claude work into Projects, inject persistent context, and share files so Claude always has the right background.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">📂</div>
+        <div class="card-title">What Are Projects?</div>
+        <div class="card-text">Projects are dedicated workspaces that group conversations around a topic or goal. They maintain persistent context so Claude doesn't start fresh each time.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📌</div>
+        <div class="card-title">Project Instructions</div>
+        <div class="card-text">Write a system prompt for the project — your company tone, your preferences, background info. This primes Claude for every conversation inside that project automatically.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📎</div>
+        <div class="card-title">File Uploads</div>
+        <div class="card-text">Upload PDFs, code files, CSVs, images, and more. Claude reads them in full — making it ideal for analyzing reports, reviewing documents, or working with your data.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔗</div>
+        <div class="card-title">Knowledge Base</div>
+        <div class="card-text">Add documents once to your project's knowledge base. Claude will reference them across all conversations in the project without needing re-uploads every time.</div>
+      </div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="block-label">💬 Good Project Instruction Example</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>Project: "Content Marketing Assistant"
+
+System Instruction:
+"You are a content strategist for TechNova, a B2B SaaS company
+targeting mid-size e-commerce businesses.
+
+Brand voice: Clear, confident, never jargony. We avoid buzzwords.
+Preferred format: Short paragraphs, use headers, no more than 800
+words per blog post unless specified.
+
+Our 3 main product pillars:
+1. Inventory Automation
+2. AI-Powered Analytics
+3. Seamless Integrations
+
+Always reference at least one pillar when writing content about us."</pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>Projects are your secret weapon for teams.</strong> Instead of everyone writing their own context in every prompt, a shared project means all conversations start from the same informed foundation. New team members onboard instantly.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">Project Setup Designer</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Project name</label>
+          <input type="text" id="s5-name" placeholder="e.g., Marketing Content Hub" oninput="updateS5()">
+        </div>
+        <div class="form-group">
+          <label>Team/role using it</label>
+          <input type="text" id="s5-role" placeholder="e.g., marketing team, solo developer" oninput="updateS5()">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Brand/tone guidelines</label>
+          <input type="text" id="s5-tone" placeholder="e.g., professional but friendly, no jargon" oninput="updateS5()">
+        </div>
+        <div class="form-group">
+          <label>Key background info</label>
+          <input type="text" id="s5-bg" placeholder="e.g., SaaS for accountants, 50 employees" oninput="updateS5()">
+        </div>
+      </div>
+      <div class="output-label">📋 Your Project Instruction</div>
+      <div class="output-area" id="s5-output">Fill the fields to generate a project system instruction...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-4-0">
+        <p>1. What is the main advantage of Claude Projects over regular conversations?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-4-0',false)"><span>🔘</span> Claude responds faster in Projects</div>
+          <div class="opt" onclick="checkQ(this,'q-4-0',true)"><span>🔘</span> Persistent context and instructions mean Claude always starts informed</div>
+          <div class="opt" onclick="checkQ(this,'q-4-0',false)"><span>🔘</span> Projects are cheaper to use</div>
+        </div>
+        <div class="quiz-feedback" id="qf-4-0"></div>
+      </div>
+      <div class="question" id="q-4-1">
+        <p>2. A Project's "system instruction" is…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-4-1',true)"><span>🔘</span> Background context that automatically primes Claude for every conversation in that project</div>
+          <div class="opt" onclick="checkQ(this,'q-4-1',false)"><span>🔘</span> A list of commands Claude must follow verbatim</div>
+          <div class="opt" onclick="checkQ(this,'q-4-1',false)"><span>🔘</span> An API key for the project</div>
+        </div>
+        <div class="quiz-feedback" id="qf-4-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 06 ========= -->
+  <section class="module reveal" id="mod-5">
+    <div class="module-header">
+      <div class="module-tag">Module 06</div>
+      <div class="module-title">🎨 Artifacts</div>
+      <div class="module-desc">Understand what Artifacts are, when Claude creates them, and how to use, edit, and export them.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">📄</div>
+        <div class="card-title">What Are Artifacts?</div>
+        <div class="card-text">Artifacts are self-contained outputs Claude creates in a side panel — documents, code files, HTML pages, SVG graphics, React components. They live alongside the conversation.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚡</div>
+        <div class="card-title">When Claude Creates Them</div>
+        <div class="card-text">Substantial content (500+ words), code meant to run, HTML/React components, structured docs. Claude auto-decides, or you can request: "Put this in an artifact."</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">✏️</div>
+        <div class="card-title">Edit & Iterate</div>
+        <div class="card-text">Ask Claude to update the artifact directly: "Add a dark mode toggle", "Refactor into a function", "Change the header style." It updates in place — no copy-paste needed.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📤</div>
+        <div class="card-title">Export & Share</div>
+        <div class="card-text">Copy the content, download the file, or (for React/HTML) preview it live in the browser. Artifacts can be exported as text, code files, or shared links.</div>
+      </div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="block-label">💬 Artifact Request Examples</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>"Create a React component for a pricing table with 3 tiers.
+Put it in an artifact so I can preview it."
+
+"Write a 1,000-word blog post about remote work trends.
+Format it as a proper document with sections."
+
+"Build me an HTML landing page for my freelance design portfolio.
+Make it dark-themed and use modern CSS."
+
+"Generate an SVG diagram showing a REST API request cycle."</pre>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Artifacts + Iteration = Magic:</strong> Once Claude creates an artifact, keep refining it in the same thread. Say "make the button bigger", "add error handling", or "translate to Spanish". Each update preserves all previous work.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">🎨 Artifact Demo — Interactive Preview</div>
+      <div class="artifact-demo">
+        <div class="artifact-toolbar">
+          <span style="font-weight:600;color:var(--accent)">📄 Artifact</span>
+          <span style="flex:1"></span>
+          <button class="artifact-btn" onclick="artifactAction('copy')">📋 Copy</button>
+          <button class="artifact-btn" onclick="artifactAction('edit')">✏️ Edit</button>
+          <button class="artifact-btn" onclick="artifactAction('preview')">👁️ Preview</button>
+          <button class="artifact-btn" onclick="artifactAction('download')">⬇️ Download</button>
+        </div>
+        <div class="artifact-content" id="artifact-display">
+// React Pricing Card Component
+const PricingCard = ({ plan, price, features }) => (
+  &lt;div className="card"&gt;
+    &lt;h2&gt;{plan}&lt;/h2&gt;
+    &lt;p className="price"&gt;${price}/mo&lt;/p&gt;
+    &lt;ul&gt;{features.map(f =&gt; &lt;li key={f}&gt;{f}&lt;/li&gt;)}&lt;/ul&gt;
+    &lt;button&gt;Get Started&lt;/button&gt;
+  &lt;/div&gt;
+);
+        </div>
+        <div id="artifact-msg" style="font-size:.78rem;color:var(--accent);margin-top:8px;min-height:18px"></div>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-5-0">
+        <p>1. An Artifact is best described as…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-5-0',false)"><span>🔘</span> An old, outdated piece of code Claude produces</div>
+          <div class="opt" onclick="checkQ(this,'q-5-0',true)"><span>🔘</span> A self-contained, reusable output (doc, code, HTML) created in a side panel</div>
+          <div class="opt" onclick="checkQ(this,'q-5-0',false)"><span>🔘</span> A saved conversation thread</div>
+        </div>
+        <div class="quiz-feedback" id="qf-5-0"></div>
+      </div>
+      <div class="question" id="q-5-1">
+        <p>2. To update an artifact, you should…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-5-1',false)"><span>🔘</span> Delete it and ask Claude to create a new one from scratch</div>
+          <div class="opt" onclick="checkQ(this,'q-5-1',true)"><span>🔘</span> Ask Claude to update it directly in the conversation: "Add X to the artifact"</div>
+          <div class="opt" onclick="checkQ(this,'q-5-1',false)"><span>🔘</span> Download it, edit it manually, and re-upload</div>
+        </div>
+        <div class="quiz-feedback" id="qf-5-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 07 ========= -->
+  <section class="module reveal" id="mod-6">
+    <div class="module-header">
+      <div class="module-tag">Module 07</div>
+      <div class="module-title">🔧 Skills & Tools</div>
+      <div class="module-desc">Extend Claude's reach by connecting external tools via MCP — from Google Drive to Notion to Slack and beyond.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🔌</div>
+        <div class="card-title">What Are Tools?</div>
+        <div class="card-text">Tools let Claude take actions beyond text — browsing the web, executing code, reading files, calling APIs. Each tool extends what Claude can do in a conversation.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">⚙️</div>
+        <div class="card-title">MCP (Model Context Protocol)</div>
+        <div class="card-text">MCP is a standard for connecting Claude to external services. Any app that builds an MCP server can be plugged into Claude — enabling deep integrations without custom coding.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <div class="card-title">Web Search</div>
+        <div class="card-text">With web search enabled, Claude can look up real-time information, verify facts, and cite sources. Essential for research tasks where fresh data matters.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🌐</div>
+        <div class="card-title">Popular Connectors</div>
+        <div class="card-text">Google Drive, Gmail, Slack, Notion, GitHub, Asana, Jira, Salesforce, and more. Connect once, and Claude can read, write, and update data across your entire stack.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="block-label">🔧 How MCP Works (Conceptually)</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>User: "Find all emails about the Q4 report and summarize them."
+
+Without tools:  Claude can only say "I don't have access to your email."
+With Gmail MCP: Claude → calls Gmail MCP → searches inbox → reads threads
+                      → summarizes findings → presents results.
+
+The MCP bridge:
+[ Claude ] ←→ [ MCP Server ] ←→ [ External Service (Gmail, Notion, etc.) ]
+
+You connect MCP servers once in Settings → Connectors.
+Claude then decides when to call them based on your request.</pre>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body"><strong>MCP is the future of AI workflows.</strong> Rather than exporting data and pasting it into Claude, MCP lets Claude live inside your actual tools. This transforms Claude from a chatbot into a genuine work automation layer.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">🔌 Tool Connector Demo</div>
+      <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:12px">Click tools to "connect" them and see what Claude can do with each:</p>
+      <div class="tools-grid" id="tools-grid">
+        <div class="tool-chip" onclick="toggleTool(this,'gmail','Read & send emails, search inbox, organize threads')">
+          <div class="t-icon">📧</div><div class="t-name">Gmail</div><div class="t-desc">Emails</div>
+        </div>
+        <div class="tool-chip" onclick="toggleTool(this,'notion','Read/write Notion pages, manage databases, add tasks')">
+          <div class="t-icon">📝</div><div class="t-name">Notion</div><div class="t-desc">Notes & DB</div>
+        </div>
+        <div class="tool-chip" onclick="toggleTool(this,'gdrive','Search Drive, read docs, create & share files')">
+          <div class="t-icon">📁</div><div class="t-name">Google Drive</div><div class="t-desc">Files</div>
+        </div>
+        <div class="tool-chip" onclick="toggleTool(this,'slack','Send messages, read channels, search conversations')">
+          <div class="t-icon">💬</div><div class="t-name">Slack</div><div class="t-desc">Messaging</div>
+        </div>
+        <div class="tool-chip" onclick="toggleTool(this,'github','Read repos, create PRs, review code changes')">
+          <div class="t-icon">🐙</div><div class="t-name">GitHub</div><div class="t-desc">Code repos</div>
+        </div>
+        <div class="tool-chip" onclick="toggleTool(this,'calendar','View/create events, check availability, schedule')">
+          <div class="t-icon">📅</div><div class="t-name">Calendar</div><div class="t-desc">Events</div>
+        </div>
+      </div>
+      <div id="tool-info" style="margin-top:12px;font-size:.83rem;color:var(--accent);min-height:24px;padding:8px;border-radius:6px;background:rgba(0,208,132,.06);border:1px solid rgba(0,208,132,.15);display:none"></div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-6-0">
+        <p>1. What does MCP stand for in the context of Claude?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-6-0',false)"><span>🔘</span> Machine Control Program</div>
+          <div class="opt" onclick="checkQ(this,'q-6-0',true)"><span>🔘</span> Model Context Protocol — a standard for connecting Claude to external services</div>
+          <div class="opt" onclick="checkQ(this,'q-6-0',false)"><span>🔘</span> Multi-Channel Processing</div>
+        </div>
+        <div class="quiz-feedback" id="qf-6-0"></div>
+      </div>
+      <div class="question" id="q-6-1">
+        <p>2. With Gmail MCP connected, Claude can…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-6-1',false)"><span>🔘</span> Only read emails Claude sent itself</div>
+          <div class="opt" onclick="checkQ(this,'q-6-1',true)"><span>🔘</span> Search your inbox, read threads, and help you draft replies in context</div>
+          <div class="opt" onclick="checkQ(this,'q-6-1',false)"><span>🔘</span> Still not access email — you need to paste it manually</div>
+        </div>
+        <div class="quiz-feedback" id="qf-6-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 08 ========= -->
+  <section class="module reveal" id="mod-7">
+    <div class="module-header">
+      <div class="module-tag">Module 08</div>
+      <div class="module-title">🔬 Enterprise Search & Research Mode</div>
+      <div class="module-desc">Use Claude's deep research capabilities to synthesize information from multiple sources with citations and verified grounding.</div>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card">
+        <div class="card-icon">🔍</div>
+        <div class="card-title">Deep Research</div>
+        <div class="card-text">Research Mode lets Claude run extended searches, synthesize multiple sources, and produce long-form research reports — far beyond what a single web search can do.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📌</div>
+        <div class="card-title">Search Grounding</div>
+        <div class="card-text">When web search is enabled, Claude grounds its answers in real-time data. Claims are backed by sources, not just training data — critical for time-sensitive facts.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">📚</div>
+        <div class="card-title">Citing Sources</div>
+        <div class="card-text">Claude can cite its sources inline when using search. Ask "cite your sources" or "add footnotes" and it will link back to the web pages it used to build the answer.</div>
+      </div>
+      <div class="card">
+        <div class="card-icon">🏢</div>
+        <div class="card-title">Enterprise Search</div>
+        <div class="card-text">In enterprise settings, Claude can search across your internal knowledge bases, connected tools (Drive, Notion, Slack), and the web simultaneously to give unified answers.</div>
+      </div>
+    </div>
+
+    <div class="prompt-block">
+      <div class="block-label">💬 Research Mode Prompt Examples</div>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+      <pre>"Research the current state of edge AI inference in 2025.
+Cite your sources. I want a structured report with:
+1. Market overview (with numbers)
+2. Key players and their approaches
+3. Technical challenges remaining
+4. 6-month outlook
+Target length: 600-800 words."
+
+"Compare the top 3 no-code app builders available today.
+Use web search to get current pricing. Present as a comparison table."
+
+"Find recent academic papers on transformer attention optimization
+published in 2024-2025 and summarize the main findings."</pre>
+    </div>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body"><strong>Always verify critical facts:</strong> Even with web search, Claude can misread or misattribute sources. For high-stakes decisions (medical, legal, financial), treat Claude's research as a starting point — not a final answer.</div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">Research Prompt Builder</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Research topic</label>
+          <input type="text" id="s8-topic" placeholder="e.g., AI in healthcare diagnostics" oninput="updateS8()">
+        </div>
+        <div class="form-group">
+          <label>Depth needed</label>
+          <select id="s8-depth" onchange="updateS8()">
+            <option value="overview">Quick overview (300 words)</option>
+            <option value="standard">Standard research (600 words)</option>
+            <option value="deep">Deep research (1200+ words, cited)</option>
+            <option value="comparison">Comparison analysis</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Specific angle or question</label>
+          <input type="text" id="s8-angle" placeholder="e.g., focus on cost vs accuracy tradeoffs" oninput="updateS8()">
+        </div>
+        <div class="form-group">
+          <label>Output format</label>
+          <select id="s8-fmt" onchange="updateS8()">
+            <option value="report">Structured report</option>
+            <option value="bullets">Bullet-point summary</option>
+            <option value="table">Comparison table</option>
+            <option value="tldr">TL;DR + key facts</option>
+          </select>
+        </div>
+      </div>
+      <div class="output-label">🔬 Your Research Prompt</div>
+      <div class="output-area" id="s8-output">Fill the fields to build a deep research prompt...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-7-0">
+        <p>1. What does "search grounding" mean in Claude's context?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-7-0',true)"><span>🔘</span> Claude's answers are backed by real-time web sources rather than just training data</div>
+          <div class="opt" onclick="checkQ(this,'q-7-0',false)"><span>🔘</span> Claude is physically grounded and can't move around</div>
+          <div class="opt" onclick="checkQ(this,'q-7-0',false)"><span>🔘</span> Claude searches only approved company databases</div>
+        </div>
+        <div class="quiz-feedback" id="qf-7-0"></div>
+      </div>
+      <div class="question" id="q-7-1">
+        <p>2. For a high-stakes medical decision, Claude's research output should be used as…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-7-1',false)"><span>🔘</span> Final authoritative guidance — Claude knows best</div>
+          <div class="opt" onclick="checkQ(this,'q-7-1',true)"><span>🔘</span> A starting point to be verified by a qualified professional</div>
+          <div class="opt" onclick="checkQ(this,'q-7-1',false)"><span>🔘</span> Ignored entirely — Claude can't help with medical topics</div>
+        </div>
+        <div class="quiz-feedback" id="qf-7-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 09 ========= -->
+  <section class="module reveal" id="mod-8">
+    <div class="module-header">
+      <div class="module-tag">Module 09</div>
+      <div class="module-title">👥 Use-Cases by Role</div>
+      <div class="module-desc">Real examples of how developers, writers, analysts, educators, and managers use Claude in their daily work.</div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">ℹ️</div>
+      <div class="callout-body">Select your role below to see tailored use-cases and example prompts. Every role unlocks different superpowers with Claude.</div>
+    </div>
+
+    <div class="sandbox" style="margin-bottom:20px">
+      <div class="sandbox-title">Role Explorer</div>
+      <div class="roles-tabs">
+        <div class="role-tab active" onclick="showRole('dev',this)">💻 Developer</div>
+        <div class="role-tab" onclick="showRole('writer',this)">✍️ Writer</div>
+        <div class="role-tab" onclick="showRole('analyst',this)">📊 Analyst</div>
+        <div class="role-tab" onclick="showRole('educator',this)">🎓 Educator</div>
+        <div class="role-tab" onclick="showRole('manager',this)">📋 Manager</div>
+      </div>
+
+      <div class="role-content active" id="role-dev">
+        <div class="use-case-item">Code review: paste a function, ask for security and performance issues</div>
+        <div class="use-case-item">Debugging: share the error + code, get root cause analysis</div>
+        <div class="use-case-item">Documentation: "Write JSDoc for this function" or generate a README</div>
+        <div class="use-case-item">Architecture: "Design a microservices architecture for X requirement"</div>
+        <div class="use-case-item">Test writing: "Write Jest unit tests for this module with edge cases"</div>
+        <div class="prompt-block" style="margin-top:12px">
+          <div class="block-label">💬 Developer Prompt</div>
+          <pre>"Review this Python function for performance and security issues.
+Point out: time complexity, any SQL injection risks,
+and suggest improvements. Use severity labels."</pre>
+        </div>
+      </div>
+
+      <div class="role-content" id="role-writer">
+        <div class="use-case-item">First drafts: "Write a 500-word article on X in a conversational tone"</div>
+        <div class="use-case-item">Editing: "Improve the clarity and flow of this draft without changing the voice"</div>
+        <div class="use-case-item">SEO: "Rewrite for SEO, targeting keyword 'remote work tools'"</div>
+        <div class="use-case-item">Multiple formats: turn one blog post into social posts, newsletter, and scripts</div>
+        <div class="use-case-item">Research assistance: "What are 10 compelling angles for a story about urban farming?"</div>
+        <div class="prompt-block" style="margin-top:12px">
+          <div class="block-label">💬 Writer Prompt</div>
+          <pre>"Take this rough draft and restructure it to have a stronger hook,
+cleaner paragraph transitions, and a memorable closing line.
+Preserve my voice — don't make it sound corporate."</pre>
+        </div>
+      </div>
+
+      <div class="role-content" id="role-analyst">
+        <div class="use-case-item">Data interpretation: paste CSV data and ask for trends and anomalies</div>
+        <div class="use-case-item">Report writing: "Turn these raw metrics into an executive summary"</div>
+        <div class="use-case-item">Formula help: "Write an Excel formula to calculate rolling 7-day average"</div>
+        <div class="use-case-item">Visualization advice: "What chart type best shows this kind of data?"</div>
+        <div class="use-case-item">Benchmarking: "Compare our Q3 metrics to industry averages for SaaS"</div>
+        <div class="prompt-block" style="margin-top:12px">
+          <div class="block-label">💬 Analyst Prompt</div>
+          <pre>"Here is our monthly retention data [paste data].
+Identify the 3 biggest trends, explain possible causes for each,
+and suggest 2 actionable experiments to test your hypotheses."</pre>
+        </div>
+      </div>
+
+      <div class="role-content" id="role-educator">
+        <div class="use-case-item">Lesson plans: "Create a 45-min lesson plan on photosynthesis for Grade 8"</div>
+        <div class="use-case-item">Quiz generation: "Write 10 multiple-choice questions with answers on WWII"</div>
+        <div class="use-case-item">Explanations: "Explain quantum entanglement like I'm 14 years old"</div>
+        <div class="use-case-item">Feedback: "Give constructive feedback on this student essay using a rubric"</div>
+        <div class="use-case-item">Differentiation: "Adapt this material for advanced learners and for struggling learners"</div>
+        <div class="prompt-block" style="margin-top:12px">
+          <div class="block-label">💬 Educator Prompt</div>
+          <pre>"Create a lesson plan for a 60-minute session teaching basic Python
+loops to high school students with no prior coding experience.
+Include: learning objectives, activities, a coding exercise, and
+an exit ticket question."</pre>
+        </div>
+      </div>
+
+      <div class="role-content" id="role-manager">
+        <div class="use-case-item">Meeting prep: "Summarize these 5 project updates into a 5-min briefing"</div>
+        <div class="use-case-item">Performance reviews: "Help me write balanced, constructive feedback for this employee"</div>
+        <div class="use-case-item">Strategy docs: "Create a one-pager for our Q1 OKRs based on this outline"</div>
+        <div class="use-case-item">Communication: "Draft a message to the team about the product deadline shift"</div>
+        <div class="use-case-item">Decision-making: "Pros/cons for building vs buying our analytics solution"</div>
+        <div class="prompt-block" style="margin-top:12px">
+          <div class="block-label">💬 Manager Prompt</div>
+          <pre>"Write a 1:1 agenda for a performance check-in with a mid-level
+engineer who has been struggling with deadlines. Include:
+3 open-ended questions, a section to celebrate wins,
+and a space to co-create an improvement plan."</pre>
+        </div>
+      </div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-8-0">
+        <p>1. A developer asks Claude to "write Jest unit tests for this module with edge cases." This is an example of Claude being used for…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-8-0',true)"><span>🔘</span> Code augmentation — automating a high-value but time-consuming developer task</div>
+          <div class="opt" onclick="checkQ(this,'q-8-0',false)"><span>🔘</span> Replacing the developer entirely</div>
+          <div class="opt" onclick="checkQ(this,'q-8-0',false)"><span>🔘</span> A task Claude can't do (it only writes documentation)</div>
+        </div>
+        <div class="quiz-feedback" id="qf-8-0"></div>
+      </div>
+      <div class="question" id="q-8-1">
+        <p>2. For a manager, one of Claude's most powerful use-cases is…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-8-1',false)"><span>🔘</span> Making all strategic decisions on their behalf</div>
+          <div class="opt" onclick="checkQ(this,'q-8-1',true)"><span>🔘</span> Drafting communications, summarizing updates, and prepping structured docs quickly</div>
+          <div class="opt" onclick="checkQ(this,'q-8-1',false)"><span>🔘</span> Managing the team calendar automatically</div>
+        </div>
+        <div class="quiz-feedback" id="qf-8-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= MODULE 10 ========= -->
+  <section class="module reveal" id="mod-9">
+    <div class="module-header">
+      <div class="module-tag">Module 10</div>
+      <div class="module-title">📐 Prompting Patterns</div>
+      <div class="module-desc">Reusable prompt templates you can copy and adapt: summarize, rewrite, extract, brainstorm, code review, and more.</div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body"><strong>Prompt patterns are reusable recipes.</strong> Master these 6 patterns and you can handle 80% of professional use-cases with Claude. Click each to expand the template.</div>
+    </div>
+
+    <div style="margin-bottom:20px">
+      <div class="pattern-card">
+        <div class="pattern-header" onclick="togglePattern(this)">
+          <div class="pattern-name">📋 Summarize Pattern <span class="tag blue">Content</span></div>
+          <span style="color:var(--text-muted);font-size:.9rem">▼</span>
+        </div>
+        <div class="pattern-body">
+          <div class="prompt-block" style="margin-bottom:0">
+            <div class="block-label">💬 Template</div>
+            <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+            <pre>Summarize the following [CONTENT_TYPE] for [AUDIENCE].
+Format: [bullet points / paragraph / TL;DR / executive summary].
+Length: [SHORT=3 bullets | MEDIUM=100 words | LONG=300 words].
+Focus on: [key decisions / action items / main arguments / data].
+
+[PASTE CONTENT HERE]</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <div class="pattern-header" onclick="togglePattern(this)">
+          <div class="pattern-name">✍️ Rewrite Pattern <span class="tag green">Writing</span></div>
+          <span style="color:var(--text-muted);font-size:.9rem">▼</span>
+        </div>
+        <div class="pattern-body">
+          <div class="prompt-block" style="margin-bottom:0">
+            <div class="block-label">💬 Template</div>
+            <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+            <pre>Rewrite the following text for [AUDIENCE] in a [TONE] voice.
+Goals: [improve clarity / fix grammar / make more persuasive / simplify].
+Constraints: [keep it under X words / preserve the key message / don't change facts].
+Style reference: [example style or "match the existing paragraph structure"].
+
+Original text:
+[PASTE TEXT HERE]</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <div class="pattern-header" onclick="togglePattern(this)">
+          <div class="pattern-name">🔍 Extract Pattern <span class="tag blue">Analysis</span></div>
+          <span style="color:var(--text-muted);font-size:.9rem">▼</span>
+        </div>
+        <div class="pattern-body">
+          <div class="prompt-block" style="margin-bottom:0">
+            <div class="block-label">💬 Template</div>
+            <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+            <pre>From the following [DOCUMENT_TYPE], extract all [ENTITY_TYPE].
+Entity types to find: [names / dates / prices / action items / requirements / risks].
+Output format: [JSON / table / numbered list / structured markdown].
+If something is ambiguous, flag it with a ⚠️ symbol.
+
+[PASTE DOCUMENT HERE]</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <div class="pattern-header" onclick="togglePattern(this)">
+          <div class="pattern-name">🧠 Brainstorm Pattern <span class="tag yellow">Ideation</span></div>
+          <span style="color:var(--text-muted);font-size:.9rem">▼</span>
+        </div>
+        <div class="pattern-body">
+          <div class="prompt-block" style="margin-bottom:0">
+            <div class="block-label">💬 Template</div>
+            <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+            <pre>Generate [NUMBER] [IDEA_TYPE] for [GOAL/CONTEXT].
+Target audience: [AUDIENCE].
+Constraints: [budget / time / technical / brand constraints].
+Style: [realistic / creative / outside-the-box / data-driven].
+For each idea, include: [1-line description / why it works / potential challenge].
+
+Avoid: [things to explicitly exclude].</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <div class="pattern-header" onclick="togglePattern(this)">
+          <div class="pattern-name">💻 Code Review Pattern <span class="tag blue">Dev</span></div>
+          <span style="color:var(--text-muted);font-size:.9rem">▼</span>
+        </div>
+        <div class="pattern-body">
+          <div class="prompt-block" style="margin-bottom:0">
+            <div class="block-label">💬 Template</div>
+            <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+            <pre>Review the following [LANGUAGE] code. Check for:
+- [Security vulnerabilities / SQL injection / XSS]
+- [Performance: time complexity, unnecessary re-renders]
+- [Code quality: readability, naming, DRY violations]
+- [Edge cases not handled]
+
+Label each finding: 🔴 Critical | 🟡 Minor | 🟢 Suggestion
+At the end, give an overall score out of 10 and a top-3 priority fixes list.
+
+```[LANGUAGE]
+[PASTE CODE HERE]
+```</pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="pattern-card">
+        <div class="pattern-header" onclick="togglePattern(this)">
+          <div class="pattern-name">📊 Comparison Pattern <span class="tag green">Analysis</span></div>
+          <span style="color:var(--text-muted);font-size:.9rem">▼</span>
+        </div>
+        <div class="pattern-body">
+          <div class="prompt-block" style="margin-bottom:0">
+            <div class="block-label">💬 Template</div>
+            <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+            <pre>Compare [OPTION_A] vs [OPTION_B] (vs [OPTION_C]) for [USE_CASE].
+
+Evaluation criteria (weight each if needed):
+- [Cost / Scalability / Ease of use / Community support / Performance]
+
+Output format: markdown comparison table.
+Then: 1 paragraph recommendation for [my specific context: DESCRIBE IT].
+Tone: objective, data-driven, no fluff.</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sandbox">
+      <div class="sandbox-title">Pattern Customizer</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Pick a pattern</label>
+          <select id="s10-pattern" onchange="updateS10()">
+            <option value="">— select —</option>
+            <option value="summarize">Summarize</option>
+            <option value="rewrite">Rewrite</option>
+            <option value="extract">Extract</option>
+            <option value="brainstorm">Brainstorm</option>
+            <option value="codereview">Code Review</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Fill in [TOPIC] or main variable</label>
+          <input type="text" id="s10-var" placeholder="e.g., product launch email" oninput="updateS10()">
+        </div>
+      </div>
+      <div class="output-label">📐 Customized Pattern Prompt</div>
+      <div class="output-area" id="s10-output">Select a pattern and fill in your topic...</div>
+    </div>
+
+    <div class="quiz">
+      <div class="quiz-title">Knowledge Check</div>
+      <div class="question" id="q-9-0">
+        <p>1. In the Extract Pattern, what does flagging ambiguous items with ⚠️ achieve?</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-9-0',false)"><span>🔘</span> It causes Claude to skip those items</div>
+          <div class="opt" onclick="checkQ(this,'q-9-0',true)"><span>🔘</span> It makes uncertain data visible so you can verify it manually rather than trust it blindly</div>
+          <div class="opt" onclick="checkQ(this,'q-9-0',false)"><span>🔘</span> It triggers Claude to search the web for more info</div>
+        </div>
+        <div class="quiz-feedback" id="qf-9-0"></div>
+      </div>
+      <div class="question" id="q-9-1">
+        <p>2. The main benefit of using prompt templates/patterns is…</p>
+        <div class="options">
+          <div class="opt" onclick="checkQ(this,'q-9-1',false)"><span>🔘</span> They make Claude respond faster</div>
+          <div class="opt" onclick="checkQ(this,'q-9-1',true)"><span>🔘</span> Consistency and reusability — you get predictable, structured results without rebuilding from scratch</div>
+          <div class="opt" onclick="checkQ(this,'q-9-1',false)"><span>🔘</span> Claude requires templates or it won't respond</div>
+        </div>
+        <div class="quiz-feedback" id="qf-9-1"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========= TASKS SECTION ========= -->
+  <div class="section-divider"></div>
+  <section id="tasks-section">
+    <div class="tasks-header reveal">
+      <div class="hero-badge" style="margin-bottom:12px">📋 HANDS-ON TASKS</div>
+      <h2>Apply What You've Learned</h2>
+      <p>4 tasks covering all 10 modules. Each task unlocks after the previous one passes. Progress saved automatically.</p>
+    </div>
+
+    <!-- TASK 1 -->
+    <div class="task-card reveal" id="task-1-card">
+      <div class="task-header">
+        <div class="task-num">Task 01 · Modules 1–3</div>
+        <div class="task-title">Write 3 Real-World Prompts</div>
+        <div class="task-sub">Apply what you learned about prompt basics and prompt engineering</div>
+      </div>
+      <div class="task-body">
+        <div class="task-scenario">
+          <strong>Scenario:</strong> You're onboarding a new team member. Write 3 prompts for Claude to help with 3 different professional scenarios — one for writing/content, one for analysis/data, and one for code/technical work. Each prompt must demonstrate clarity, context, and format constraints.
+        </div>
+        <div class="task-reqs" id="t1-reqs">
+          <h4>Requirements Checklist</h4>
+          <div class="req-item" id="r1-0">Has at least 3 prompts (separated by blank lines or numbers)</div>
+          <div class="req-item" id="r1-1">At least one prompt mentions a specific audience or role</div>
+          <div class="req-item" id="r1-2">At least one prompt specifies output format (table / bullet / words)</div>
+          <div class="req-item" id="r1-3">At least one prompt includes a tone directive (formal / casual / etc.)</div>
+          <div class="req-item" id="r1-4">Total length is at least 100 characters</div>
+        </div>
+        <textarea class="task-editor" id="t1-editor" placeholder="Write your 3 prompts here..." oninput="checkTask1()"></textarea>
+        <div class="task-actions">
+          <button class="btn btn-primary" onclick="submitTask(1)">✓ Submit Task 1</button>
+          <button class="btn btn-outline" onclick="clearTask(1)">Clear</button>
+        </div>
+        <div class="task-result" id="t1-result"></div>
+      </div>
+    </div>
+
+    <!-- TASK 2 -->
+    <div class="task-card reveal locked-task" id="task-2-card">
+      <div class="task-header">
+        <div class="task-num">Task 02 · Modules 4–5</div>
+        <div class="task-title">Design a Project Setup</div>
+        <div class="task-sub">Create a complete Claude Project configuration for a fictional team</div>
+      </div>
+      <div class="task-body">
+        <div class="lock-badge" id="t2-lock">🔒 Complete Task 1 first to unlock</div>
+        <div class="task-scenario">
+          <strong>Scenario:</strong> You're setting up Claude for a 5-person marketing team at a startup called "Lumeo" — an AI-powered video editing tool. Design their Project setup: name it, write a system instruction, list what files to add to the knowledge base, and describe which Claude mode/product each team member should use.
+        </div>
+        <div class="task-reqs" id="t2-reqs">
+          <h4>Requirements Checklist</h4>
+          <div class="req-item" id="r2-0">Includes a project name</div>
+          <div class="req-item" id="r2-1">Has a system instruction with tone/voice guidelines</div>
+          <div class="req-item" id="r2-2">Mentions at least 2 specific files for the knowledge base</div>
+          <div class="req-item" id="r2-3">References at least one Claude mode (Chat / Cowork / Code / extension)</div>
+          <div class="req-item" id="r2-4">Total length is at least 120 characters</div>
+        </div>
+        <textarea class="task-editor" id="t2-editor" placeholder="Design the project setup here..." oninput="checkTask2()" disabled></textarea>
+        <div class="task-actions">
+          <button class="btn btn-primary" onclick="submitTask(2)" id="t2-submit" disabled>✓ Submit Task 2</button>
+          <button class="btn btn-outline" onclick="clearTask(2)">Clear</button>
+        </div>
+        <div class="task-result" id="t2-result"></div>
+      </div>
+    </div>
+
+    <!-- TASK 3 -->
+    <div class="task-card reveal locked-task" id="task-3-card">
+      <div class="task-header">
+        <div class="task-num">Task 03 · Modules 6–8</div>
+        <div class="task-title">Build a Prompt Template with Variables</div>
+        <div class="task-sub">Create a reusable template using [VARIABLE] placeholders</div>
+      </div>
+      <div class="task-body">
+        <div class="lock-badge" id="t3-lock">🔒 Complete Task 2 first to unlock</div>
+        <div class="task-scenario">
+          <strong>Scenario:</strong> Your team uses Claude for research every week. Build a reusable prompt template for research reports that includes variable placeholders like [TOPIC], [AUDIENCE], [FORMAT], and [DEPTH]. The template should be usable by any team member for any research need.
+        </div>
+        <div class="task-reqs" id="t3-reqs">
+          <h4>Requirements Checklist</h4>
+          <div class="req-item" id="r3-0">Has at least 3 [VARIABLE] placeholders in brackets</div>
+          <div class="req-item" id="r3-1">Includes [TOPIC] or [SUBJECT] variable</div>
+          <div class="req-item" id="r3-2">Specifies an output format variable or constraint</div>
+          <div class="req-item" id="r3-3">Includes instructions for depth, length, or audience</div>
+          <div class="req-item" id="r3-4">Total length is at least 100 characters</div>
+        </div>
+        <textarea class="task-editor" id="t3-editor" placeholder="Write your template with [VARIABLES] here..." oninput="checkTask3()" disabled></textarea>
+        <div class="task-actions">
+          <button class="btn btn-primary" onclick="submitTask(3)" id="t3-submit" disabled>✓ Submit Task 3</button>
+          <button class="btn btn-outline" onclick="clearTask(3)">Clear</button>
+        </div>
+        <div class="task-result" id="t3-result"></div>
+      </div>
+    </div>
+
+    <!-- TASK 4 -->
+    <div class="task-card reveal locked-task" id="task-4-card">
+      <div class="task-header">
+        <div class="task-num">Task 04 · All Modules</div>
+        <div class="task-title">Design a Full Claude Workflow</div>
+        <div class="task-sub">Create a complete end-to-end Claude workflow for a role of your choice</div>
+      </div>
+      <div class="task-body">
+        <div class="lock-badge" id="t4-lock">🔒 Complete Task 3 first to unlock</div>
+        <div class="task-scenario">
+          <strong>Scenario:</strong> You're writing a "Claude Playbook" for your role (developer, writer, analyst, educator, manager — your choice). Describe: 1) Your role and top 3 Claude use-cases, 2) What Projects and knowledge base you'd set up, 3) Which tools/MCP you'd connect, 4) A sample prompt using a pattern for your most common task, 5) How you'd use Research Mode in your work.
+        </div>
+        <div class="task-reqs" id="t4-reqs">
+          <h4>Requirements Checklist</h4>
+          <div class="req-item" id="r4-0">States a specific role and 3 use-cases</div>
+          <div class="req-item" id="r4-1">Describes a Project setup with instructions</div>
+          <div class="req-item" id="r4-2">Mentions at least one MCP/tool connection</div>
+          <div class="req-item" id="r4-3">Includes a sample prompt using a pattern</div>
+          <div class="req-item" id="r4-4">References research mode or deep research</div>
+          <div class="req-item" id="r4-5">Total length is at least 200 characters</div>
+        </div>
+        <textarea class="task-editor" id="t4-editor" placeholder="Write your full Claude workflow here..." oninput="checkTask4()" disabled></textarea>
+        <div class="task-actions">
+          <button class="btn btn-primary" onclick="submitTask(4)" id="t4-submit" disabled>✓ Submit Task 4</button>
+          <button class="btn btn-outline" onclick="clearTask(4)">Clear</button>
+        </div>
+        <div class="task-result" id="t4-result"></div>
+      </div>
+    </div>
+
+    <!-- Completion -->
+    <div id="completion-banner" style="display:none;text-align:center;padding:48px 20px;background:var(--bg-card);border:1px solid rgba(0,208,132,.3);border-radius:var(--radius);margin-top:24px">
+      <div style="font-size:3rem;margin-bottom:16px">🎓</div>
+      <h2 style="font-size:1.8rem;font-weight:800;background:linear-gradient(135deg,var(--primary-light),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:8px">Masterclass Complete!</h2>
+      <p style="color:var(--text-muted);margin-bottom:20px">You've completed all 10 modules and 4 tasks of Claude 101. You're now ready to work with Claude like a pro.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-success" onclick="window.print()">🖨️ Print Certificate</button>
+        <button class="btn btn-outline" onclick="resetAll()">↺ Reset & Restart</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- BOTTOM NAV -->
+<div id="bottom-nav">
+  <button class="bnav-btn" id="bnav-prev" onclick="navigateModule(-1)" disabled>← Prev</button>
+  <div class="bnav-center">
+    <div class="bnav-label"><span id="bnav-mod-label">Module 1</span>What is Claude</div>
+    <div class="bnav-dots" id="bnav-dots"></div>
+  </div>
+  <button class="bnav-btn" id="bnav-next" onclick="navigateModule(1)">Next →</button>
+</div>
+
+<script>
+// ===================== STATE =====================
+const MODULES = [
+  {id:'mod-0',label:'01',title:'What is Claude'},
+  {id:'mod-1',label:'02',title:'First Conversation'},
+  {id:'mod-2',label:'03',title:'Better Results'},
+  {id:'mod-3',label:'04',title:'Desktop App'},
+  {id:'mod-4',label:'05',title:'Projects'},
+  {id:'mod-5',label:'06',title:'Artifacts'},
+  {id:'mod-6',label:'07',title:'Skills & Tools'},
+  {id:'mod-7',label:'08',title:'Research Mode'},
+  {id:'mod-8',label:'09',title:'Use-Cases'},
+  {id:'mod-9',label:'10',title:'Patterns'},
+];
+
+let currentModule = 0;
+let quizScores = {};
+let taskPassed = {1:false,2:false,3:false,4:false};
+
+// Load from localStorage
+function loadState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('claude101') || '{}');
+    if(s.quizScores) quizScores = s.quizScores;
+    if(s.taskPassed) taskPassed = s.taskPassed;
+    if(s.editors) {
+      [1,2,3,4].forEach(n => {
+        const el = document.getElementById('t'+n+'-editor');
+        if(el && s.editors['t'+n]) el.value = s.editors['t'+n];
+      });
+    }
+  } catch(e){}
+}
+
+function saveState() {
+  const editors = {};
+  [1,2,3,4].forEach(n => {
+    const el = document.getElementById('t'+n+'-editor');
+    if(el) editors['t'+n] = el.value;
+  });
+  localStorage.setItem('claude101', JSON.stringify({quizScores, taskPassed, editors}));
+}
+
+// ===================== PROGRESS =====================
+function updateProgress() {
+  const total = 20 + 4; // 20 quiz + 4 tasks
+  let done = Object.keys(quizScores).length + Object.values(taskPassed).filter(Boolean).length;
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('progress-bar').style.width = pct + '%';
+  // Nav tabs
+  MODULES.forEach((m,i) => {
+    const tab = document.querySelectorAll('.nav-tab')[i+1]; // +1 for brand
+    if(!tab) return;
+    const modQuizKeys = Object.keys(quizScores).filter(k => k.startsWith('q-'+i+'-'));
+    if(modQuizKeys.length >= 2) tab.classList.add('completed');
+    if(i === currentModule) tab.classList.add('active');
+    else tab.classList.remove('active');
+  });
+}
+
+// ===================== SCROLL / NAV =====================
+function scrollToModule(idx) {
+  currentModule = idx;
+  const el = document.getElementById('mod-'+idx);
+  if(el) el.scrollIntoView({behavior:'smooth'});
+  updateBNav();
+  updateProgress();
+}
+
+function navigateModule(dir) {
+  const next = currentModule + dir;
+  if(next < 0 || next >= MODULES.length) return;
+  scrollToModule(next);
+}
+
+function updateBNav() {
+  const m = MODULES[currentModule];
+  document.getElementById('bnav-mod-label').textContent = 'Module ' + m.label;
+  document.querySelector('#bottom-nav .bnav-label').childNodes[1].textContent = m.title;
+  document.getElementById('bnav-prev').disabled = currentModule === 0;
+  document.getElementById('bnav-next').disabled = currentModule === MODULES.length - 1;
+  // dots
+  const dotsEl = document.getElementById('bnav-dots');
+  dotsEl.innerHTML = '';
+  MODULES.forEach((mm,i) => {
+    const d = document.createElement('div');
+    d.className = 'bnav-dot' + (i===currentModule?' active':'') + (quizScores['q-'+i+'-0'] && quizScores['q-'+i+'-1']?' done':'');
+    d.onclick = () => scrollToModule(i);
+    d.style.cursor='pointer';
+    dotsEl.appendChild(d);
+  });
+}
+
+// Scroll observer for active nav
+const observerOpts = {rootMargin:'-60px 0px -60% 0px'};
+const moduleObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      const idx = MODULES.findIndex(m => m.id === e.target.id);
+      if(idx !== -1) {
+        currentModule = idx;
+        updateBNav();
+        updateProgress();
+      }
+    }
+  });
+}, observerOpts);
+
+// Scroll reveal
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.classList.add('visible');
+      revealObserver.unobserve(e.target);
+    }
+  });
+}, {rootMargin:'0px 0px -50px 0px'});
+
+// ===================== QUIZ =====================
+function checkQ(el, questionId, isCorrect) {
+  if(el.classList.contains('locked')) return;
+  const container = document.getElementById(questionId);
+  container.querySelectorAll('.opt').forEach(o => o.classList.add('locked'));
+  const fb = document.getElementById('qf-' + questionId.replace('q-',''));
+  if(isCorrect) {
+    el.classList.add('correct');
+    const parts = questionId.split('-');
+    const key = questionId;
+    quizScores[key] = true;
+    if(fb) {fb.textContent = '✓ Correct!'; fb.className='quiz-feedback ok';}
+  } else {
+    el.classList.add('wrong');
+    if(fb) {fb.textContent = '✗ Not quite. The other options have a clue!'; fb.className='quiz-feedback err';}
+  }
+  saveState();
+  updateProgress();
+}
+
+// ===================== SANDBOX FUNCTIONS =====================
+function updateS1() {
+  const task = document.getElementById('s1-task').value;
+  const domain = document.getElementById('s1-domain').value.trim() || 'your field';
+  const out = document.getElementById('s1-output');
+  const map = {
+    write:`✅ Writing + ${domain}: Claude is excellent at this. It can generate drafts, articles, emails, reports, and creative content. Provide tone + audience + length for best results.`,
+    code:`✅ Coding + ${domain}: Claude handles most languages fluently. Share your tech stack and describe what the code should do. It can also debug, refactor, and explain code.`,
+    analyze:`✅ Analysis + ${domain}: Claude can interpret data, find patterns, and write insights. Paste your data or describe it. Ask for a specific format (table, bullets, chart suggestions).`,
+    summarize:`✅ Summarizing + ${domain}: A core strength. Paste long text and specify the audience and length. Claude will extract key points and structure them clearly.`,
+    brainstorm:`✅ Brainstorming + ${domain}: Claude excels at generating ideas from multiple angles. Give constraints, audience, and goals to get more targeted, useful options.`,
+    translate:`✅ Translation + ${domain}: Claude translates accurately across most languages. Specify the target language and if you want a formal or informal register.`,
+    explain:`✅ Explaining + ${domain}: Tell Claude who the audience is and how technical they are. It can explain anything from quantum physics to JavaScript closures in plain language.`,
+  };
+  out.textContent = task ? map[task] : 'Select a task and type your domain to see how well Claude handles it...';
+}
+
+function updateS2() {
+  const task = document.getElementById('s2-task').value.trim();
+  const audience = document.getElementById('s2-audience').value.trim();
+  const tone = document.getElementById('s2-tone').value;
+  const ctx = document.getElementById('s2-ctx').value.trim();
+  const out = document.getElementById('s2-output');
+  if(!task) { out.textContent = 'Fill in the fields above to generate your first message...'; return; }
+  let msg = '';
+  if(task) msg += task.charAt(0).toUpperCase() + task.slice(1);
+  if(audience) msg += ` for ${audience}`;
+  if(ctx) msg += ` ${ctx}`;
+  msg += `.\nTone: ${tone}.`;
+  if(audience) msg += `\nAudience: ${audience}.`;
+  out.textContent = msg;
+}
+
+function updateS3() {
+  const ctx = document.getElementById('s3-ctx').value.trim();
+  const cmd = document.getElementById('s3-cmd').value.trim();
+  const tgt = document.getElementById('s3-tgt').value.trim();
+  const fmt = document.getElementById('s3-fmt').value.trim();
+  const out = document.getElementById('s3-output');
+  if(!ctx && !cmd) { out.textContent = 'Fill the CCTF fields to build a structured prompt...'; return; }
+  let msg = '';
+  if(ctx) msg += `Context: ${ctx}.\n`;
+  if(cmd) msg += `\n${cmd.charAt(0).toUpperCase() + cmd.slice(1)}.`;
+  if(tgt) msg += `\n\nThis is for ${tgt}.`;
+  if(fmt) msg += `\n\nFormat: ${fmt}.`;
+  out.textContent = msg.trim();
+}
+
+function updateS4() {
+  const use = document.getElementById('s4-use').value;
+  const level = document.getElementById('s4-level').value;
+  const out = document.getElementById('s4-output');
+  const recs = {
+    write:{beginner:'→ Use Claude.ai Chat (web or app)\nGo to claude.ai, start a new conversation, and paste your writing task directly.',intermediate:'→ Use Claude.ai Chat or Desktop App\nFor longer documents, the Desktop App with Cowork is ideal.',developer:'→ Claude.ai Chat or Cowork\nFor scripting document generation, consider the API.'},
+    code:{beginner:'→ Claude.ai Chat\nPaste your code and ask questions. No setup needed.',intermediate:'→ Claude.ai Chat or Claude Code VSCode Extension\nFor in-editor support, install the VSCode extension.',developer:'→ Claude Code (CLI) — claude_code_terminal\nRun `npm install -g @anthropic-ai/claude-code` and use it in your project folder.'},
+    data:{beginner:'→ Claude in Excel\nInstall the Excel add-in. Claude will analyze your spreadsheet in context.',intermediate:'→ Claude in Excel or Claude.ai Chat\nFor CSV analysis, paste data directly into Chat.',developer:'→ Claude API + pandas\nProgrammatically analyze data with Claude as the reasoning layer.'},
+    research:{beginner:'→ Claude.ai Chat with Web Search enabled\nTurn on web search in the tools menu. Ask Claude to research and cite sources.',intermediate:'→ Claude.ai Chat — Research/Deep Research Mode\nFor longer research, use the Research feature for multi-source synthesis.',developer:'→ API with web_search tool enabled\nBuild custom research pipelines.'},
+    slides:{beginner:'→ Claude in PowerPoint (add-in)\nInstall the PowerPoint add-in and describe your presentation.',intermediate:'→ Claude in PowerPoint or Gamma (via Claude)\nGamma can generate full presentations from a brief.',developer:'→ Claude.ai Chat + Artifact (HTML/React)\nGenerate presentation HTML/CSS with Claude.'},
+    automate:{beginner:'→ Not recommended without coding knowledge\nStart with Claude.ai Chat for simpler tasks.',intermediate:'→ Claude Code VSCode Extension\nInstall in VSCode and use it for code assistance.',developer:'→ Claude Code (CLI) — best option\nFull agentic coding: it reads your codebase, makes changes, runs tests.'},
+    chat:{beginner:'→ Claude.ai Chat (claude.ai)\nSimplest option. Open a browser tab and start typing.',intermediate:'→ Claude.ai Chat or Desktop App\nDesktop App gives clipboard and screen context.',developer:'→ Claude.ai Chat or API\nFor automation, use the API directly.'},
+    complex:{beginner:'→ Claude Desktop App + Cowork\nCowork is designed for multi-file, multi-app workflows.',intermediate:'→ Claude Desktop App (Cowork)\nConnect your files and let Claude work across them.',developer:'→ Claude Code or API\nFor full programmatic control over complex workflows.'},
+  };
+  if(!use) { out.textContent = 'Select your use case to get a recommendation...'; return; }
+  const rec = recs[use];
+  out.textContent = rec[level] || rec.intermediate || 'See claude.ai for options.';
+}
+
+function updateS5() {
+  const name = document.getElementById('s5-name').value.trim();
+  const role = document.getElementById('s5-role').value.trim();
+  const tone = document.getElementById('s5-tone').value.trim();
+  const bg = document.getElementById('s5-bg').value.trim();
+  const out = document.getElementById('s5-output');
+  if(!name) { out.textContent = 'Fill the fields to generate a project system instruction...'; return; }
+  let msg = `Project: "${name || 'Unnamed Project'}"\n\n`;
+  msg += `You are an AI assistant for ${role || 'a professional team'}.\n\n`;
+  if(tone) msg += `Voice & Tone: ${tone}.\n\n`;
+  if(bg) msg += `Background: ${bg}.\n\n`;
+  msg += `Always ask for clarification if the request is ambiguous.\nDefault output format: clear, well-structured markdown.`;
+  out.textContent = msg;
+}
+
+function artifactAction(action) {
+  const msg = document.getElementById('artifact-msg');
+  const actions = {
+    copy:'📋 Content copied to clipboard! Paste it anywhere.',
+    edit:'✏️ In real Claude: type your edit request in the chat below the artifact.',
+    preview:'👁️ In real Claude: HTML/React artifacts show a live preview in the side panel.',
+    download:'⬇️ In real Claude: click Download to save as a .jsx, .html, or .md file.'
+  };
+  msg.textContent = actions[action];
+  setTimeout(() => msg.textContent = '', 3000);
+}
+
+function toggleTool(el, name, desc) {
+  const info = document.getElementById('tool-info');
+  if(el.classList.contains('connected')) {
+    el.classList.remove('connected');
+    info.style.display='none';
+  } else {
+    el.classList.add('connected');
+    info.style.display='block';
+    info.innerHTML = `<strong style="color:var(--accent)">✓ ${name} connected.</strong> Claude can now: ${desc}`;
+  }
+}
+
+function updateS8() {
+  const topic = document.getElementById('s8-topic').value.trim();
+  const depth = document.getElementById('s8-depth').value;
+  const angle = document.getElementById('s8-angle').value.trim();
+  const fmt = document.getElementById('s8-fmt').value;
+  const out = document.getElementById('s8-output');
+  if(!topic) { out.textContent = 'Fill the fields to build a deep research prompt...'; return; }
+  const depthMap = {
+    overview:`Write a 300-word overview of ${topic}.`,
+    standard:`Research ${topic} and write a 600-word analysis.`,
+    deep:`Conduct deep research on ${topic}. Write a comprehensive 1,200+ word report with cited sources.`,
+    comparison:`Compare the leading options in ${topic}. Use web search for current data.`
+  };
+  const fmtMap = {
+    report:'Format as a structured report with clear sections and headers.',
+    bullets:'Format as a concise bullet-point summary.',
+    table:'Format as a comparison table.',
+    tldr:'Format as a TL;DR (3 sentences max) followed by key facts as bullets.'
+  };
+  let msg = depthMap[depth] + '\n';
+  if(angle) msg += `Focus specifically on: ${angle}.\n`;
+  msg += fmtMap[fmt];
+  if(depth === 'deep') msg += '\nCite sources inline.';
+  out.textContent = msg;
+}
+
+function showRole(roleId, tabEl) {
+  document.querySelectorAll('.role-content').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.role-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('role-' + roleId).classList.add('active');
+  tabEl.classList.add('active');
+}
+
+function togglePattern(headerEl) {
+  const body = headerEl.nextElementSibling;
+  const arrow = headerEl.querySelector('span:last-child');
+  body.classList.toggle('open');
+  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+}
+
+function updateS10() {
+  const pat = document.getElementById('s10-pattern').value;
+  const v = document.getElementById('s10-var').value.trim() || '[YOUR TOPIC]';
+  const out = document.getElementById('s10-output');
+  const templates = {
+    summarize:`Summarize the following document about ${v} for a general audience.\nFormat: 3 bullet points + 1 key takeaway.\nLength: under 100 words.\n\n[PASTE CONTENT HERE]`,
+    rewrite:`Rewrite the following content about ${v} for a professional audience.\nGoals: improve clarity, fix flow, make more persuasive.\nConstraint: keep under 200 words.\n\n[PASTE ORIGINAL HERE]`,
+    extract:`From the following document about ${v}, extract all:\n- Action items (with owners if mentioned)\n- Deadlines or dates\n- Key decisions made\n\nLabel uncertain items with ⚠️.\n[PASTE DOCUMENT HERE]`,
+    brainstorm:`Generate 10 creative ideas for ${v}.\nFor each: 1-line description + why it works + main challenge.\nConstraints: realistic, under $5k budget, can be done in 1 month.\nAvoid: generic or overly complex ideas.`,
+    codereview:`Review this code related to ${v}. Check for:\n- Security vulnerabilities 🔴\n- Performance issues 🟡\n- Code quality improvements 🟢\n\nEnd with: overall score /10 + top 3 priorities.\n\`\`\`\n[PASTE CODE HERE]\n\`\`\``
+  };
+  out.textContent = pat ? templates[pat] : 'Select a pattern and fill in your topic...';
+}
+
+// ===================== TASK CHECKERS =====================
+function checkTask1() {
+  const v = document.getElementById('t1-editor').value;
+  const reqs = [
+    /(\n\n|\n[0-9]|[0-9]\.).*(\n\n|\n[0-9]|[0-9]\.)/.test(v) || (v.match(/\n\n/g)||[]).length >= 1,
+    /audience|for |developer|manager|team|beginner|senior|executive|student|non-technical/i.test(v),
+    /bullet|table|list|paragraph|words?|format|structured|markdown/i.test(v),
+    /formal|casual|professional|friendly|technical|tone|warm|concise/i.test(v),
+    v.length >= 100
+  ];
+  reqs.forEach((r,i) => {
+    document.getElementById('r1-'+i).className = 'req-item ' + (r?'met':'');
+  });
+  return reqs;
+}
+
+function checkTask2() {
+  const v = document.getElementById('t2-editor').value;
+  const reqs = [
+    /project|name:/i.test(v) || v.includes('Lumeo') || v.length > 20,
+    /tone|voice|style|formal|casual|guideline|instruction/i.test(v),
+    /(\.pdf|\.docx|brand|brief|guide|handbook|report|spec|doc|file)/i.test(v),
+    /chat|cowork|code|desktop|extension|excel|powerpoint|chrome/i.test(v),
+    v.length >= 120
+  ];
+  reqs.forEach((r,i) => {
+    document.getElementById('r2-'+i).className = 'req-item ' + (r?'met':'');
+  });
+  return reqs;
+}
+
+function checkTask3() {
+  const v = document.getElementById('t3-editor').value;
+  const vars = (v.match(/\[[A-Z_]+\]/g)||[]);
+  const reqs = [
+    vars.length >= 3,
+    /\[(TOPIC|SUBJECT|THEME)\]/i.test(v),
+    /\[(FORMAT|OUTPUT|STRUCTURE)\]/i.test(v),
+    /\[(DEPTH|LENGTH|AUDIENCE|DETAIL|WORDS)\]/i.test(v),
+    v.length >= 100
+  ];
+  reqs.forEach((r,i) => {
+    document.getElementById('r3-'+i).className = 'req-item ' + (r?'met':'');
+  });
+  return reqs;
+}
+
+function checkTask4() {
+  const v = document.getElementById('t4-editor').value;
+  const reqs = [
+    /(developer|writer|analyst|educator|manager|role)/i.test(v) && (v.match(/use.?case|task|workflow|scenario/gi)||[]).length >= 1,
+    /project|knowledge base|instruction/i.test(v),
+    /mcp|tool|gmail|notion|slack|github|connect/i.test(v),
+    /\[(.*?)\]|template|pattern|summarize|rewrite|extract|brainstorm|code review/i.test(v),
+    /research|search|citation|cite|grounding/i.test(v),
+    v.length >= 200
+  ];
+  reqs.forEach((r,i) => {
+    document.getElementById('r4-'+i).className = 'req-item ' + (r?'met':'');
+  });
+  return reqs;
+}
+
+function submitTask(n) {
+  const checkers = {1:checkTask1,2:checkTask2,3:checkTask3,4:checkTask4};
+  const reqs = checkers[n]();
+  const passed = reqs.every(Boolean);
+  const result = document.getElementById('t'+n+'-result');
+  if(passed) {
+    taskPassed[n] = true;
+    result.className = 'task-result pass';
+    result.textContent = '🎉 Task ' + n + ' passed! All requirements met. ' + (n < 4 ? 'Task ' + (n+1) + ' is now unlocked.' : 'Masterclass complete!');
+    unlockTask(n+1);
+    saveState();
+    updateProgress();
+    if(n === 4 && Object.values(taskPassed).every(Boolean)) {
+      setTimeout(() => document.getElementById('completion-banner').style.display='block', 500);
+    }
+  } else {
+    result.className = 'task-result fail';
+    const missing = reqs.filter(r => !r).length;
+    result.textContent = `✗ Not quite — ${missing} requirement(s) still missing. Check the checklist above.`;
+  }
+}
+
+function unlockTask(n) {
+  if(n > 4) return;
+  const card = document.getElementById('task-'+n+'-card');
+  const lock = document.getElementById('t'+n+'-lock');
+  const editor = document.getElementById('t'+n+'-editor');
+  const submit = document.getElementById('t'+n+'-submit');
+  if(card) card.classList.remove('locked-task');
+  if(lock) lock.style.display='none';
+  if(editor) editor.disabled = false;
+  if(submit) submit.disabled = false;
+}
+
+function clearTask(n) {
+  document.getElementById('t'+n+'-editor').value = '';
+  document.getElementById('t'+n+'-result').className = 'task-result';
+  document.getElementById('t'+n+'-result').textContent = '';
+  // re-check
+  const checkers = {1:checkTask1,2:checkTask2,3:checkTask3,4:checkTask4};
+  checkers[n]();
+  saveState();
+}
+
+function resetAll() {
+  localStorage.removeItem('claude101');
+  location.reload();
+}
+
+function copyBlock(btn) {
+  const block = btn.closest('.code-block,.prompt-block');
+  const pre = block.querySelector('pre');
+  navigator.clipboard.writeText(pre.textContent).then(() => {
+    btn.textContent = 'copied!';
+    setTimeout(() => btn.textContent = 'copy', 1500);
+  });
+}
+
+// ===================== INIT =====================
+document.addEventListener('DOMContentLoaded', () => {
+  loadState();
+
+  // Build dots
+  updateBNav();
+
+  // Scroll reveal
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // Module observer
+  MODULES.forEach(m => {
+    const el = document.getElementById(m.id);
+    if(el) moduleObserver.observe(el);
+  });
+
+  // Restore task unlock states
+  if(taskPassed[1]) unlockTask(2);
+  if(taskPassed[2]) unlockTask(3);
+  if(taskPassed[3]) unlockTask(4);
+
+  // Restore quiz visuals (re-read from quizScores)
+  Object.keys(quizScores).forEach(key => {
+    // Can't easily restore which option was clicked, so just mark them
+    const qEl = document.getElementById(key);
+    if(qEl) {
+      const fb = document.getElementById('qf-' + key.replace('q-',''));
+      if(fb) {fb.textContent='✓ Correct!'; fb.className='quiz-feedback ok';}
+    }
+  });
+
+  // Restore task checkers if text exists
+  [1,2,3,4].forEach(n => {
+    const el = document.getElementById('t'+n+'-editor');
+    if(el && el.value) {
+      const checkers = {1:checkTask1,2:checkTask2,3:checkTask3,4:checkTask4};
+      checkers[n]();
+    }
+  });
+
+  if(taskPassed[4] && Object.values(taskPassed).every(Boolean)) {
+    document.getElementById('completion-banner').style.display='block';
+  }
+
+  updateProgress();
+
+  // Scroll progress bar
+  window.addEventListener('scroll', () => {
+    const doc = document.documentElement;
+    const scrolled = doc.scrollTop;
+    const max = doc.scrollHeight - doc.clientHeight;
+    const pct = max > 0 ? (scrolled / max) * 100 : 0;
+    document.getElementById('progress-bar').style.width = pct + '%';
+  });
+});
+</script>
+</body>
+</html>
